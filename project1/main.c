@@ -1,0 +1,328 @@
+#include "array_utils.h"
+#include "globals.h"
+#include "menu.h"
+#include "sort.h"
+#include "utils.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int g_use_by_value_mode = 0;
+
+#define K_CONSTANT 5
+
+void task_1a(void);
+void task_1b(void);
+void task_1c(void);
+void task_2a(void);
+void task_2b(void);
+void select_mode(void);
+
+int main(void) {
+  select_mode();
+
+  MenuItem items[] = {{1, "Task 1A - Array Analysis & HeapSort/CountingSort", task_1a},
+                      {2, "Task 1B - Prime Check & RadixSort/CombSort", task_1b},
+                      {3, "Task 1C - Negative Product & MergeSort/BubbleSort", task_1c},
+                      {4, "Task 2A - 2D Array Diagonal & QuickSort/ShellSort", task_2a},
+                      {5, "Task 2B - 2D Array Max Element & SelectionSort/InsertionSort", task_2b},
+                      {0, "Exit", NULL}};
+
+  int item_count = sizeof(items) / sizeof(MenuItem);
+
+  Menu *main_menu = menu_create("LAB 1 - SORTING ALGORITHMS", items, item_count);
+
+  if (!main_menu) {
+    fprintf(stderr, "Error: Failed to create menu\n");
+    return 1;
+  }
+
+  menu_run(main_menu, 0);
+
+  menu_free(main_menu);
+
+  return 0;
+}
+
+void select_mode(void) {
+  clear_screen();
+  printf("\nSORTING IMPLEMENTATION MODE\n");
+  print_separator('=', 40);
+  printf("[1] Pass by Value (copy array)\n");
+  printf("[2] Pass by Pointer (in-place)\n");
+
+  int choice = get_int_input_range("\nChoice: ", 1, 2);
+  g_use_by_value_mode = (choice == 1) ? 1 : 0;
+
+  printf("Mode: %s\n", g_use_by_value_mode ? "By Value" : "By Pointer");
+  wait_for_enter();
+}
+
+void task_1a(void) {
+  printf("TASK 1A: Sort by average comparison (HeapSort/CountingSort)\n");
+  print_separator('=', 60);
+
+  int n = get_int_input_range("\nArray size: ", 1, 1000);
+  int *arr = create_and_populate_vec1(n, -100, 100);
+
+  print_vec1(arr, n, "Original Array:");
+  print_sorting_mode();
+
+  double avg_even = calculate_avg_at_even_positions(arr, n);
+  double avg_odd = calculate_avg_at_odd_positions(arr, n);
+
+  printf("\nAvg[even]=%.2f, Avg[odd]=%.2f\n", avg_even, avg_odd);
+
+  if (avg_even > avg_odd) {
+    printf("HeapSort (ascending)\n");
+
+    if (g_use_by_value_mode) {
+      int *sorted = heap_sort_by_value(arr, n, 1);
+      if (sorted) {
+        print_vec1(sorted, n, "\nSorted Array:");
+        free(sorted);
+      }
+    } else {
+      heap_sort_by_pointer(arr, n, 1);
+      print_vec1(arr, n, "\nSorted Array:");
+    }
+  } else {
+    printf("CountingSort (descending)\n");
+
+    if (g_use_by_value_mode) {
+      int *sorted = counting_sort_by_value(arr, n, 0);
+      if (sorted) {
+        print_vec1(sorted, n, "\nSorted Array:");
+        free(sorted);
+      }
+    } else {
+      counting_sort_by_pointer(arr, n, 0);
+      print_vec1(arr, n, "\nSorted Array:");
+    }
+  }
+
+  free(arr);
+}
+
+void task_1b(void) {
+  printf("TASK 1B: Sort by prime check (RadixSort/CombSort)\n");
+  print_separator('=', 60);
+
+  int n = get_int_input_range("\nArray size: ", 1, 1000);
+  int *arr = create_and_populate_vec1(n, 1, 100);
+
+  print_vec1(arr, n, "Original Array:");
+  print_sorting_mode();
+
+  int has_primes = has_prime_numbers(arr, n);
+
+  if (has_primes) {
+    printf("\nPrimes found --> RadixSort (ascending)\n");
+
+    if (g_use_by_value_mode) {
+      int *sorted = radix_sort_by_value(arr, n, 1);
+      if (sorted) {
+        print_vec1(sorted, n, "\nSorted Array:");
+        free(sorted);
+      }
+    } else {
+      radix_sort_by_pointer(arr, n, 1);
+      print_vec1(arr, n, "\nSorted Array:");
+    }
+  } else {
+    printf("\nNo primes --> CombSort (descending)\n");
+
+    if (g_use_by_value_mode) {
+      int *sorted = comb_sort_by_value(arr, n, 0);
+      if (sorted) {
+        print_vec1(sorted, n, "\nSorted Array:");
+        free(sorted);
+      }
+    } else {
+      comb_sort_by_pointer(arr, n, 0);
+      print_vec1(arr, n, "\nSorted Array:");
+    }
+  }
+
+  free(arr);
+}
+
+void task_1c(void) {
+  printf("TASK 1C: Sort by negative product (MergeSort/BubbleSort)\n");
+  print_separator('=', 60);
+
+  int n = get_int_input_range("\nArray size: ", 1, 1000);
+  int *arr = create_and_populate_vec1(n, -50, 50);
+
+  print_vec1(arr, n, "Original Array:");
+  print_sorting_mode();
+
+  int product;
+  int has_negatives = calculate_product_of_negatives(arr, n, &product);
+
+  if (has_negatives && product < 0) {
+    printf("\nNegative product=%d --> MergeSort (descending)\n", product);
+    if (g_use_by_value_mode) {
+      int *sorted = merge_sort_by_value(arr, n, 0);
+      if (sorted) {
+        print_vec1(sorted, n, "\nSorted Array:");
+        free(sorted);
+      }
+    } else {
+      merge_sort_by_pointer(arr, n, 0);
+      print_vec1(arr, n, "\nSorted Array:");
+    }
+  } else {
+    printf("\nNo negative product --> BubbleSort (ascending)\n");
+    if (g_use_by_value_mode) {
+      int *sorted = bubble_sort_by_value(arr, n, 1);
+      if (sorted) {
+        print_vec1(sorted, n, "\nSorted Array:");
+        free(sorted);
+      }
+    } else {
+      bubble_sort_by_pointer(arr, n, 1);
+      print_vec1(arr, n, "\nSorted Array:");
+    }
+  }
+
+  free(arr);
+}
+
+void task_2a(void) {
+  printf("TASK 2A: Diagonal/column sort (QuickSort/ShellSort)\n");
+  print_separator('=', 60);
+
+  int n = get_int_input_range("\nMatrix size (n x n): ", 1, 100);
+  int *arr = create_and_populate_vec2(n, n, -50, 50);
+
+  print_vec2(arr, n, n, "Original Array:");
+  print_sorting_mode();
+
+  int count = count_above_main_diagonal(n);
+  printf("\nAbove diagonal=%d, k=%d\n", count, K_CONSTANT);
+
+  if (count > K_CONSTANT) {
+    printf("QuickSort secondary diagonal (ascending)\n");
+    int *diag = (int *)malloc(n * sizeof(int));
+
+    extract_secondary_diagonal(arr, n, diag);
+
+    if (g_use_by_value_mode) {
+      int *sorted_diag = quick_sort_by_value(diag, n, 1);
+      if (sorted_diag) {
+        place_secondary_diagonal(arr, n, sorted_diag);
+        free(sorted_diag);
+      }
+    } else {
+      quick_sort_by_pointer(diag, n, 1);
+      place_secondary_diagonal(arr, n, diag);
+    }
+
+    free(diag);
+    print_vec2(arr, n, n, "\nSorted Array:");
+  } else {
+    printf("ShellSort first column (descending)\n");
+    int *col = (int *)malloc(n * sizeof(int));
+
+    extract_first_column(arr, n, n, col);
+
+    if (g_use_by_value_mode) {
+      int *sorted_col = shell_sort_by_value(col, n, 0);
+      if (sorted_col) {
+        place_first_column(arr, n, n, sorted_col);
+        free(sorted_col);
+      }
+    } else {
+      shell_sort_by_pointer(col, n, 0);
+      place_first_column(arr, n, n, col);
+    }
+
+    free(col);
+    print_vec2(arr, n, n, "\nSorted Array:");
+  }
+
+  free(arr);
+}
+
+void task_2b(void) {
+  printf("TASK 2B: Sort by max element (SelectionSort/InsertionSort)\n");
+  print_separator('=', 60);
+
+  int rows = get_int_input_range("\nRows: ", 1, 100);
+  int cols = get_int_input_range("Columns: ", 1, 100);
+  int *arr = create_and_populate_vec2(rows, cols, -50, 50);
+
+  print_vec2(arr, rows, cols, "Original Array:");
+  print_sorting_mode();
+
+  int max_val, count;
+  int *positions = NULL;
+  find_max_info(arr, rows, cols, &max_val, &count, &positions);
+
+  printf("\nMax=%d appears %d time(s)\n", max_val, count);
+
+  if (count == 1) {
+    printf("Position [%d][%d] --> SelectionSort row (ascending)\n", positions[0], positions[1]);
+    int *row = (int *)malloc(cols * sizeof(int));
+
+    extract_row(arr, cols, positions[0], row);
+
+    if (g_use_by_value_mode) {
+      int *sorted_row = selection_sort_by_value(row, cols, 1);
+      if (sorted_row) {
+        place_row(arr, cols, positions[0], sorted_row);
+        free(sorted_row);
+      }
+    } else {
+      selection_sort_by_pointer(row, cols, 1);
+      place_row(arr, cols, positions[0], row);
+    }
+
+    free(row);
+    print_vec2(arr, rows, cols, "\nSorted Array:");
+  } else {
+    printf("Multiple occurrences --> InsertionSort columns (descending)\n");
+
+    int *col_indices = (int *)malloc(count * sizeof(int));
+    int unique_cols = 0;
+
+    for (int i = 0; i < count; i++) {
+      int col_idx = positions[i * 2 + 1];
+      int found = 0;
+      for (int j = 0; j < unique_cols; j++) {
+        if (col_indices[j] == col_idx) {
+          found = 1;
+          break;
+        }
+      }
+      if (!found) {
+        col_indices[unique_cols++] = col_idx;
+      }
+    }
+
+    for (int i = 0; i < unique_cols; i++) {
+      int col_idx = col_indices[i];
+      int *col = (int *)malloc(rows * sizeof(int));
+      extract_column(arr, rows, cols, col_idx, col);
+
+      if (g_use_by_value_mode) {
+        int *sorted_col = insertion_sort_by_value(col, rows, 0);
+        if (sorted_col) {
+          place_column(arr, rows, cols, col_idx, sorted_col);
+          free(sorted_col);
+        }
+      } else {
+        insertion_sort_by_pointer(col, rows, 0);
+        place_column(arr, rows, cols, col_idx, col);
+      }
+
+      free(col);
+    }
+
+    free(col_indices);
+    print_vec2(arr, rows, cols, "\nSorted Array:");
+  }
+
+  free(positions);
+  free(arr);
+}
