@@ -16,6 +16,9 @@ void action_sort_products(void);
 void action_load_mock_data(void);
 
 int main(void) {
+  enter_alternate_screen();
+  setup_terminal_cleanup();
+
   MenuItem items[] = {{1, "Input products from keyboard", action_input_products},
                       {2, "Display products", action_display_products},
                       {3, "Sort products (Quick Sort / Merge Sort)", action_sort_products},

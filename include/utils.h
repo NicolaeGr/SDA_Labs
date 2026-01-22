@@ -3,6 +3,9 @@
 
 #include <stddef.h>
 
+void setup_terminal_cleanup(void);
+void enter_alternate_screen(void);
+void exit_alternate_screen(void);
 void clear_screen(void);
 void print_separator(char ch, int length);
 void clear_input_buffer(void);

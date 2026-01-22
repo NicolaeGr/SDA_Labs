@@ -18,6 +18,9 @@ void task_2b(void);
 void select_mode(void);
 
 int main(void) {
+  enter_alternate_screen();
+  setup_terminal_cleanup();
+
   select_mode();
 
   MenuItem items[] = {{1, "Task 1A - Array Analysis & HeapSort/CountingSort", task_1a},

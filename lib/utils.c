@@ -1,9 +1,33 @@
 #include "utils.h"
 #include <math.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+static void signal_handler(int sig) {
+  (void)sig;
+  exit_alternate_screen();
+  exit(130);
+}
+
+void setup_terminal_cleanup(void) {
+  atexit(exit_alternate_screen);
+
+  signal(SIGINT, signal_handler);
+  signal(SIGTERM, signal_handler);
+}
+
+void enter_alternate_screen(void) {
+  printf("\033[?1049h");
+  fflush(stdout);
+}
+
+void exit_alternate_screen(void) {
+  printf("\033[?1049l");
+  fflush(stdout);
+}
 
 void clear_screen(void) {
   printf("\033[2J\033[H");
@@ -18,7 +42,7 @@ void print_separator(char ch, int length) {
 }
 
 void clear_input_buffer(void) {
-    int c;
+  int c;
   while ((c = getchar()) != '\n' && c != EOF)
     ;
 }
@@ -51,7 +75,7 @@ int get_int_input(const char *prompt) {
 
 int get_int_input_range(const char *prompt, int min, int max) {
   int value;
-int has_min = !isinf((double)min);
+  int has_min = !isinf((double)min);
   int has_max = !isinf((double)max);
 
   while (1) {
@@ -69,9 +93,9 @@ int has_min = !isinf((double)min);
       return value;
     }
 
-if (has_min && has_max) {
-    printf("Value must be between %d and %d. Please try again.\n", min, max);
-} else if (has_min) {
+    if (has_min && has_max) {
+      printf("Value must be between %d and %d. Please try again.\n", min, max);
+    } else if (has_min) {
       printf("Value must be at least %d. Please try again.\n", min);
     } else if (has_max) {
       printf("Value must be at most %d. Please try again.\n", max);
