@@ -184,13 +184,3 @@ int *duplicate_vec1(const int *src, size_t size) {
 }
 
 int *duplicate_vec2(const int *src, size_t rows, size_t cols) { return duplicate_vec1(src, rows * cols); }
-
-void print_sorting_mode(void) {
-  printf("\n[Mode: ");
-  if (g_use_by_value_mode) {
-    printf("Version A - Pass by Value (Creates Copy)");
-  } else {
-    printf("Version B - Pass by Pointer (In-Place)");
-  }
-  printf("]\n");
-}

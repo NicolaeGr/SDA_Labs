@@ -27,6 +27,5 @@ void copy_vec1(int *dest, const int *src, size_t size);
 void copy_vec2(int *dest, const int *src, size_t rows, size_t cols);
 int *duplicate_vec1(const int *src, size_t size);
 int *duplicate_vec2(const int *src, size_t rows, size_t cols);
-void print_sorting_mode(void);
 
 #endif // UTILS_H

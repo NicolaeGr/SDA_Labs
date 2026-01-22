@@ -43,6 +43,16 @@ int main(void) {
   return 0;
 }
 
+void print_sorting_mode(void) {
+  printf("\n[Mode: ");
+  if (g_use_by_value_mode) {
+    printf("Version A - Pass by Value (Creates Copy)");
+  } else {
+    printf("Version B - Pass by Pointer (In-Place)");
+  }
+  printf("]\n");
+}
+
 void select_mode(void) {
   clear_screen();
   printf("\nSORTING IMPLEMENTATION MODE\n");
