@@ -15,6 +15,9 @@ include_directories(
 set(LIB_SOURCES
     ${PROJECT_ROOT}/lib/menu.c
     ${PROJECT_ROOT}/lib/utils.c
+    ${PROJECT_ROOT}/lib/quick_sort.c
+    ${PROJECT_ROOT}/lib/merge_sort.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/product.c
 )
 
 add_executable(project2

@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "globals.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,13 +17,16 @@ void print_separator(char ch, int length) {
   putchar('\n');
 }
 
+void clear_input_buffer(void) {
+    int c;
+  while ((c = getchar()) != '\n' && c != EOF)
+    ;
+}
+
 void wait_for_enter(void) {
   printf("\nPress Enter to continue...");
   fflush(stdout);
-
-  int c;
-  while ((c = getchar()) != '\n' && c != EOF)
-    ;
+  clear_input_buffer();
 }
 
 int get_int_input(const char *prompt) {
@@ -36,9 +39,7 @@ int get_int_input(const char *prompt) {
 
     result = scanf("%d", &value);
 
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF)
-      ;
+    clear_input_buffer();
 
     if (result == 1) {
       return value;
@@ -50,15 +51,81 @@ int get_int_input(const char *prompt) {
 
 int get_int_input_range(const char *prompt, int min, int max) {
   int value;
+int has_min = !isinf((double)min);
+  int has_max = !isinf((double)max);
 
   while (1) {
     value = get_int_input(prompt);
 
-    if (value >= min && value <= max) {
+    int valid = 1;
+    if (has_min && value < min) {
+      valid = 0;
+    }
+    if (has_max && value > max) {
+      valid = 0;
+    }
+
+    if (valid) {
       return value;
     }
 
+if (has_min && has_max) {
     printf("Value must be between %d and %d. Please try again.\n", min, max);
+} else if (has_min) {
+      printf("Value must be at least %d. Please try again.\n", min);
+    } else if (has_max) {
+      printf("Value must be at most %d. Please try again.\n", max);
+    }
+  }
+}
+
+double get_double_input(const char *prompt) {
+  double value;
+  int result;
+
+  while (1) {
+    printf("%s", prompt);
+    fflush(stdout);
+
+    result = scanf("%lf", &value);
+
+    clear_input_buffer();
+
+    if (result == 1) {
+      return value;
+    }
+
+    printf("Invalid input! Please enter a valid number.\\n");
+  }
+}
+
+double get_double_input_range(const char *prompt, double min, double max) {
+  double value;
+  int has_min = !isinf(min);
+  int has_max = !isinf(max);
+
+  while (1) {
+    value = get_double_input(prompt);
+
+    int valid = 1;
+    if (has_min && value < min) {
+      valid = 0;
+    }
+    if (has_max && value > max) {
+      valid = 0;
+    }
+
+    if (valid) {
+      return value;
+    }
+
+    if (has_min && has_max) {
+      printf("Value must be between %.2f and %.2f. Please try again.\\n", min, max);
+    } else if (has_min) {
+      printf("Value must be at least %.2f. Please try again.\\n", min);
+    } else if (has_max) {
+      printf("Value must be at most %.2f. Please try again.\\n", max);
+    }
   }
 }
 
