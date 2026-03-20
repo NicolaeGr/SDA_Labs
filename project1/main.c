@@ -6,9 +6,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int g_use_by_value_mode = 0;
+int g_use_pointer_arithmetic_mode = 1;
 
 #define K_CONSTANT 5
+
+typedef void (*sort_fn)(int *arr, size_t size, int ascending);
 
 void task_1a(void);
 void task_1b(void);
@@ -16,18 +18,22 @@ void task_1c(void);
 void task_2a(void);
 void task_2b(void);
 void select_mode(void);
+void print_sorting_mode(void);
+void run_selected_sort(sort_fn array_sort, sort_fn pointer_sort, int *arr, size_t size, int ascending);
 
 int main(void) {
   enter_alternate_screen();
   setup_terminal_cleanup();
 
   select_mode();
+  wait_for_enter();
 
   MenuItem items[] = {{1, "Task 1A - Array Analysis & HeapSort/CountingSort", task_1a},
                       {2, "Task 1B - Prime Check & RadixSort/CombSort", task_1b},
                       {3, "Task 1C - Negative Product & MergeSort/BubbleSort", task_1c},
                       {4, "Task 2A - 2D Array Diagonal & QuickSort/ShellSort", task_2a},
                       {5, "Task 2B - 2D Array Max Element & SelectionSort/InsertionSort", task_2b},
+                      {6, "Change sorting method", select_mode},
                       {0, "Exit", NULL}};
 
   int item_count = sizeof(items) / sizeof(MenuItem);
@@ -47,27 +53,34 @@ int main(void) {
 }
 
 void print_sorting_mode(void) {
-  printf("\n[Mode: ");
-  if (g_use_by_value_mode) {
-    printf("Version A - Pass by Value (Creates Copy)");
+  printf("\n[Indexing method: ");
+  if (g_use_pointer_arithmetic_mode) {
+    printf("Pointer arithmetic ((arr + i))");
   } else {
-    printf("Version B - Pass by Pointer (In-Place)");
+    printf("Array notation (arr[i])");
   }
   printf("]\n");
 }
 
 void select_mode(void) {
   clear_screen();
-  printf("\nSORTING IMPLEMENTATION MODE\n");
+  printf("\nSORTING METHOD\n");
   print_separator('=', 40);
-  printf("[1] Pass by Value (copy array)\n");
-  printf("[2] Pass by Pointer (in-place)\n");
+  printf("[1] Array notation (arr[i])\n");
+  printf("[2] Pointer arithmetic (*(arr + i))\n");
 
   int choice = get_int_input_range("\nChoice: ", 1, 2);
-  g_use_by_value_mode = (choice == 1) ? 1 : 0;
+  g_use_pointer_arithmetic_mode = (choice == 2) ? 1 : 0;
 
-  printf("Mode: %s\n", g_use_by_value_mode ? "By Value" : "By Pointer");
-  wait_for_enter();
+  printf("Method: %s\n", g_use_pointer_arithmetic_mode ? "Pointer arithmetic" : "Array notation");
+}
+
+void run_selected_sort(sort_fn array_sort, sort_fn pointer_sort, int *arr, size_t size, int ascending) {
+  if (g_use_pointer_arithmetic_mode) {
+    pointer_sort(arr, size, ascending);
+  } else {
+    array_sort(arr, size, ascending);
+  }
 }
 
 void task_1a(void) {
@@ -87,31 +100,13 @@ void task_1a(void) {
 
   if (avg_even > avg_odd) {
     printf("HeapSort (ascending)\n");
-
-    if (g_use_by_value_mode) {
-      int *sorted = heap_sort_by_value(arr, n, 1);
-      if (sorted) {
-        print_vec1(sorted, n, "\nSorted Array:");
-        free(sorted);
-      }
-    } else {
-      heap_sort_by_pointer(arr, n, 1);
-      print_vec1(arr, n, "\nSorted Array:");
-    }
+    run_selected_sort(heap_sort_array, heap_sort_pointer, arr, (size_t)n, 1);
   } else {
     printf("CountingSort (descending)\n");
-
-    if (g_use_by_value_mode) {
-      int *sorted = counting_sort_by_value(arr, n, 0);
-      if (sorted) {
-        print_vec1(sorted, n, "\nSorted Array:");
-        free(sorted);
-      }
-    } else {
-      counting_sort_by_pointer(arr, n, 0);
-      print_vec1(arr, n, "\nSorted Array:");
-    }
+    run_selected_sort(counting_sort_array, counting_sort_pointer, arr, (size_t)n, 0);
   }
+
+  print_vec1(arr, n, "\nSorted Array:");
 
   free(arr);
 }
@@ -130,31 +125,13 @@ void task_1b(void) {
 
   if (has_primes) {
     printf("\nPrimes found --> RadixSort (ascending)\n");
-
-    if (g_use_by_value_mode) {
-      int *sorted = radix_sort_by_value(arr, n, 1);
-      if (sorted) {
-        print_vec1(sorted, n, "\nSorted Array:");
-        free(sorted);
-      }
-    } else {
-      radix_sort_by_pointer(arr, n, 1);
-      print_vec1(arr, n, "\nSorted Array:");
-    }
+    run_selected_sort(radix_sort_array, radix_sort_pointer, arr, (size_t)n, 1);
   } else {
     printf("\nNo primes --> CombSort (descending)\n");
-
-    if (g_use_by_value_mode) {
-      int *sorted = comb_sort_by_value(arr, n, 0);
-      if (sorted) {
-        print_vec1(sorted, n, "\nSorted Array:");
-        free(sorted);
-      }
-    } else {
-      comb_sort_by_pointer(arr, n, 0);
-      print_vec1(arr, n, "\nSorted Array:");
-    }
+    run_selected_sort(comb_sort_array, comb_sort_pointer, arr, (size_t)n, 0);
   }
+
+  print_vec1(arr, n, "\nSorted Array:");
 
   free(arr);
 }
@@ -174,29 +151,13 @@ void task_1c(void) {
 
   if (has_negatives && product < 0) {
     printf("\nNegative product=%d --> MergeSort (descending)\n", product);
-    if (g_use_by_value_mode) {
-      int *sorted = merge_sort_by_value(arr, n, 0);
-      if (sorted) {
-        print_vec1(sorted, n, "\nSorted Array:");
-        free(sorted);
-      }
-    } else {
-      merge_sort_by_pointer(arr, n, 0);
-      print_vec1(arr, n, "\nSorted Array:");
-    }
+    run_selected_sort(merge_sort_array, merge_sort_pointer, arr, (size_t)n, 0);
   } else {
     printf("\nNo negative product --> BubbleSort (ascending)\n");
-    if (g_use_by_value_mode) {
-      int *sorted = bubble_sort_by_value(arr, n, 1);
-      if (sorted) {
-        print_vec1(sorted, n, "\nSorted Array:");
-        free(sorted);
-      }
-    } else {
-      bubble_sort_by_pointer(arr, n, 1);
-      print_vec1(arr, n, "\nSorted Array:");
-    }
+    run_selected_sort(bubble_sort_array, bubble_sort_pointer, arr, (size_t)n, 1);
   }
+
+  print_vec1(arr, n, "\nSorted Array:");
 
   free(arr);
 }
@@ -220,16 +181,8 @@ void task_2a(void) {
 
     extract_secondary_diagonal(arr, n, diag);
 
-    if (g_use_by_value_mode) {
-      int *sorted_diag = quick_sort_by_value(diag, n, 1);
-      if (sorted_diag) {
-        place_secondary_diagonal(arr, n, sorted_diag);
-        free(sorted_diag);
-      }
-    } else {
-      quick_sort_by_pointer(diag, n, 1);
-      place_secondary_diagonal(arr, n, diag);
-    }
+    run_selected_sort(quick_sort_array, quick_sort_pointer, diag, (size_t)n, 1);
+    place_secondary_diagonal(arr, n, diag);
 
     free(diag);
     print_vec2(arr, n, n, "\nSorted Array:");
@@ -239,16 +192,8 @@ void task_2a(void) {
 
     extract_first_column(arr, n, n, col);
 
-    if (g_use_by_value_mode) {
-      int *sorted_col = shell_sort_by_value(col, n, 0);
-      if (sorted_col) {
-        place_first_column(arr, n, n, sorted_col);
-        free(sorted_col);
-      }
-    } else {
-      shell_sort_by_pointer(col, n, 0);
-      place_first_column(arr, n, n, col);
-    }
+    run_selected_sort(shell_sort_array, shell_sort_pointer, col, (size_t)n, 0);
+    place_first_column(arr, n, n, col);
 
     free(col);
     print_vec2(arr, n, n, "\nSorted Array:");
@@ -280,16 +225,8 @@ void task_2b(void) {
 
     extract_row(arr, cols, positions[0], row);
 
-    if (g_use_by_value_mode) {
-      int *sorted_row = selection_sort_by_value(row, cols, 1);
-      if (sorted_row) {
-        place_row(arr, cols, positions[0], sorted_row);
-        free(sorted_row);
-      }
-    } else {
-      selection_sort_by_pointer(row, cols, 1);
-      place_row(arr, cols, positions[0], row);
-    }
+    run_selected_sort(selection_sort_array, selection_sort_pointer, row, (size_t)cols, 1);
+    place_row(arr, cols, positions[0], row);
 
     free(row);
     print_vec2(arr, rows, cols, "\nSorted Array:");
@@ -318,16 +255,8 @@ void task_2b(void) {
       int *col = (int *)malloc(rows * sizeof(int));
       extract_column(arr, rows, cols, col_idx, col);
 
-      if (g_use_by_value_mode) {
-        int *sorted_col = insertion_sort_by_value(col, rows, 0);
-        if (sorted_col) {
-          place_column(arr, rows, cols, col_idx, sorted_col);
-          free(sorted_col);
-        }
-      } else {
-        insertion_sort_by_pointer(col, rows, 0);
-        place_column(arr, rows, cols, col_idx, col);
-      }
+      run_selected_sort(insertion_sort_array, insertion_sort_pointer, col, (size_t)rows, 0);
+      place_column(arr, rows, cols, col_idx, col);
 
       free(col);
     }

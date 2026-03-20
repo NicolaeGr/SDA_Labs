@@ -1,6 +1,4 @@
 #include "sort.h"
-#include "utils.h"
-#include <stdlib.h>
 
 #define SHRINK_FACTOR 13
 
@@ -11,16 +9,34 @@ static inline size_t calculate_next_gap(size_t current_gap) {
   return new_gap < 1 ? 1 : new_gap;
 }
 
-int *comb_sort_by_value(const int *arr, size_t size, int ascending) {
-  int *copy = duplicate_vec1(arr, size);
-  if (!copy) {
-    return NULL;
+void comb_sort_array(int *arr, size_t size, int ascending) {
+  if (size < 2) {
+    return;
   }
-  comb_sort_by_pointer(copy, size, ascending);
-  return copy;
+
+  size_t gap = size;
+  int swapped = 1;
+
+  while (gap > 1 || swapped) {
+    gap = calculate_next_gap(gap);
+    swapped = 0;
+
+    for (size_t i = 0; i + gap < size; i++) {
+      if (should_swap(arr[i], arr[i + gap], ascending)) {
+        int temp = arr[i];
+        arr[i] = arr[i + gap];
+        arr[i + gap] = temp;
+        swapped = 1;
+      }
+    }
+  }
 }
 
-void comb_sort_by_pointer(int *arr, size_t size, int ascending) {
+void comb_sort_pointer(int *arr, size_t size, int ascending) {
+  if (size < 2) {
+    return;
+  }
+
   size_t gap = size;
   int swapped = 1;
 

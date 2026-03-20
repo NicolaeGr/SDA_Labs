@@ -8,8 +8,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 get_filename_component(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/.. ABSOLUTE)
 
 include_directories(
-    ${PROJECT_ROOT}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${PROJECT_ROOT}/include
 )
 
 set(SORT_SOURCES
