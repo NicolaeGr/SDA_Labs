@@ -1,32 +1,149 @@
 #include "utils.h"
 #include <math.h>
+#include <setjmp.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
+
+static volatile sig_atomic_t g_alt_screen_active = 0;
+static volatile sig_atomic_t g_continue_pending = 0;
+static volatile sig_atomic_t g_reinstall_suspend_pending = 0;
+static volatile sig_atomic_t g_resume_to_menu_pending = 0;
+static volatile sig_atomic_t g_action_guard_active = 0;
+static sigjmp_buf g_action_abort_env;
+
+static void suspend_handler(int sig);
+
+static void install_suspend_handler(void) {
+  struct sigaction sa_suspend;
+  memset(&sa_suspend, 0, sizeof(sa_suspend));
+  sa_suspend.sa_handler = suspend_handler;
+  sa_suspend.sa_flags = SA_RESTART;
+  sigemptyset(&sa_suspend.sa_mask);
+  sigaction(SIGTSTP, &sa_suspend, NULL);
+}
+
+static void exit_alternate_screen_signal_safe(void) {
+  if (g_alt_screen_active) {
+    const char escape_seq[] = "\033[?1049l";
+    ssize_t bytes_written = write(STDOUT_FILENO, escape_seq, sizeof(escape_seq) - 1);
+    (void)bytes_written;
+    g_alt_screen_active = 0;
+  }
+}
 
 static void signal_handler(int sig) {
+  if (sig == SIGCONT) {
+    g_continue_pending = 1;
+    g_reinstall_suspend_pending = 1;
+    g_resume_to_menu_pending = 1;
+    return;
+  }
+
+  exit_alternate_screen_signal_safe();
+  _exit(128 + sig);
+}
+
+static void suspend_handler(int sig) {
   (void)sig;
-  exit_alternate_screen();
-  exit(130);
+  exit_alternate_screen_signal_safe();
+  g_resume_to_menu_pending = 1;
+
+  signal(SIGTSTP, SIG_DFL);
+  kill(getpid(), SIGTSTP);
 }
 
 void setup_terminal_cleanup(void) {
   atexit(exit_alternate_screen);
 
-  signal(SIGINT, signal_handler);
-  signal(SIGTERM, signal_handler);
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = signal_handler;
+  sa.sa_flags = SA_RESTART;
+  sigemptyset(&sa.sa_mask);
+
+  sigaction(SIGINT, &sa, NULL);
+  sigaction(SIGTERM, &sa, NULL);
+  sigaction(SIGHUP, &sa, NULL);
+  sigaction(SIGQUIT, &sa, NULL);
+  sigaction(SIGCONT, &sa, NULL);
+  install_suspend_handler();
+
+  signal(SIGPIPE, SIG_IGN);
+}
+
+void sync_terminal_events(void) {
+  if (g_reinstall_suspend_pending) {
+    g_reinstall_suspend_pending = 0;
+    install_suspend_handler();
+  }
+
+  if (g_continue_pending) {
+    g_continue_pending = 0;
+    enter_alternate_screen();
+    clear_screen();
+  }
+}
+
+int consume_resume_to_menu_request(void) {
+  if (g_resume_to_menu_pending) {
+    g_resume_to_menu_pending = 0;
+    return 1;
+  }
+  return 0;
+}
+
+int run_menu_action_with_resume_guard(void (*action)(void)) {
+  g_action_guard_active = 1;
+
+  if (sigsetjmp(g_action_abort_env, 1) != 0) {
+    g_action_guard_active = 0;
+    return 0;
+  }
+
+  action();
+  g_action_guard_active = 0;
+  return 1;
+}
+
+static void abort_action_if_resuming(void) {
+  if (g_resume_to_menu_pending && g_action_guard_active) {
+    siglongjmp(g_action_abort_env, 1);
+  }
+}
+
+int guarded_scanf(const char *format, ...) {
+  sync_terminal_events();
+  abort_action_if_resuming();
+
+  va_list args;
+  va_start(args, format);
+  int result = vscanf(format, args);
+  va_end(args);
+
+  sync_terminal_events();
+  abort_action_if_resuming();
+  return result;
 }
 
 void enter_alternate_screen(void) {
-  printf("\033[?1049h");
-  fflush(stdout);
+  if (!g_alt_screen_active) {
+    printf("\033[?1049h");
+    fflush(stdout);
+    g_alt_screen_active = 1;
+  }
 }
 
 void exit_alternate_screen(void) {
-  printf("\033[?1049l");
-  fflush(stdout);
+  if (g_alt_screen_active) {
+    printf("\033[?1049l");
+    fflush(stdout);
+    g_alt_screen_active = 0;
+  }
 }
 
 void clear_screen(void) {
@@ -61,7 +178,7 @@ int get_int_input(const char *prompt) {
     printf("%s", prompt);
     fflush(stdout);
 
-    result = scanf("%d", &value);
+    result = guarded_scanf("%d", &value);
 
     clear_input_buffer();
 
@@ -79,6 +196,9 @@ int get_int_input_range(const char *prompt, int min, int max) {
   int has_max = !isinf((double)max);
 
   while (1) {
+    sync_terminal_events();
+    abort_action_if_resuming();
+
     value = get_int_input(prompt);
 
     int valid = 1;
@@ -111,7 +231,7 @@ double get_double_input(const char *prompt) {
     printf("%s", prompt);
     fflush(stdout);
 
-    result = scanf("%lf", &value);
+    result = guarded_scanf("%lf", &value);
 
     clear_input_buffer();
 
@@ -129,6 +249,9 @@ double get_double_input_range(const char *prompt, double min, double max) {
   int has_max = !isinf(max);
 
   while (1) {
+    sync_terminal_events();
+    abort_action_if_resuming();
+
     value = get_double_input(prompt);
 
     int valid = 1;
@@ -157,6 +280,9 @@ int get_yes_no_input(const char *prompt, int default_yes) {
   char input[10];
 
   while (1) {
+    sync_terminal_events();
+    abort_action_if_resuming();
+
     if (default_yes) {
       printf("%s (Yes/no): ", prompt);
     } else {

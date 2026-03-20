@@ -42,6 +42,8 @@ void menu_run(Menu *menu, int exit_id) {
   int found;
 
   while (1) {
+    sync_terminal_events();
+    consume_resume_to_menu_request();
     clear_screen();
     menu_display(menu);
 
@@ -58,7 +60,10 @@ void menu_run(Menu *menu, int exit_id) {
         found = 1;
         if (menu->items[i].action) {
           clear_screen();
-          menu->items[i].action();
+          int completed = run_menu_action_with_resume_guard(menu->items[i].action);
+          if (!completed || consume_resume_to_menu_request()) {
+            break;
+          }
           wait_for_enter();
         }
         break;

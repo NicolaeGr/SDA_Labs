@@ -4,6 +4,10 @@
 #include <stddef.h>
 
 void setup_terminal_cleanup(void);
+void sync_terminal_events(void);
+int consume_resume_to_menu_request(void);
+int run_menu_action_with_resume_guard(void (*action)(void));
+int guarded_scanf(const char *format, ...);
 void enter_alternate_screen(void);
 void exit_alternate_screen(void);
 void clear_screen(void);
