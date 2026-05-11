@@ -37,6 +37,7 @@
             cppcheck
 
             pkg-config
+            just
           ];
 
           CMAKE_EXPORT_COMPILE_COMMANDS = "ON";

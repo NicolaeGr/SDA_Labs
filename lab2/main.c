@@ -1,11 +1,13 @@
-#include "menu.h"
-#include "product.h"
-#include "sort.h"
-#include "utils.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "common/menu.h"
+#include "common/sort.h"
+#include "common/utils.h"
+
+#include "lib/product.h"
 
 static Product *products = NULL;
 static size_t product_count = 0;

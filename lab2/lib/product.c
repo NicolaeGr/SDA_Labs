@@ -1,9 +1,21 @@
-#include "product.h"
-#include "utils.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "common/utils.h"
+
+#include "product.h"
+
+static int read_line_into(char *buffer, size_t buffer_size) {
+  if (!fgets(buffer, buffer_size, stdin)) {
+    buffer[0] = '\0';
+    return 0;
+  }
+
+  buffer[strcspn(buffer, "\n")] = 0;
+  return 1;
+}
 
 void product_input(Product *product) {
   if (!product)
@@ -11,23 +23,27 @@ void product_input(Product *product) {
 
   printf("Enter product name: ");
   fflush(stdout);
-  fgets(product->name, sizeof(product->name), stdin);
-  product->name[strcspn(product->name, "\n")] = 0;
+  if (!read_line_into(product->name, sizeof(product->name))) {
+    return;
+  }
 
   printf("Enter country: ");
   fflush(stdout);
-  fgets(product->country, sizeof(product->country), stdin);
-  product->country[strcspn(product->country, "\n")] = 0;
+  if (!read_line_into(product->country, sizeof(product->country))) {
+    return;
+  }
 
   printf("Enter manufacturer: ");
   fflush(stdout);
-  fgets(product->manufacturer, sizeof(product->manufacturer), stdin);
-  product->manufacturer[strcspn(product->manufacturer, "\n")] = 0;
+  if (!read_line_into(product->manufacturer, sizeof(product->manufacturer))) {
+    return;
+  }
 
   printf("Enter item: ");
   fflush(stdout);
-  fgets(product->item, sizeof(product->item), stdin);
-  product->item[strcspn(product->item, "\n")] = 0;
+  if (!read_line_into(product->item, sizeof(product->item))) {
+    return;
+  }
 
   product->price = get_double_input_range("Enter price: ", 0.0, INFINITY);
 }

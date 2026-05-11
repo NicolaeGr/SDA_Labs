@@ -1,10 +1,12 @@
-#include "array_utils.h"
-#include "globals.h"
-#include "menu.h"
-#include "sort.h"
-#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "common/menu.h"
+#include "common/utils.h"
+
+#include "lib/array_utils.h"
+#include "lib/globals.h"
+#include "lib/sort/sort.h"
 
 int g_use_pointer_arithmetic_mode = 1;
 
@@ -87,24 +89,40 @@ void task_1a(void) {
   printf("TASK 1A: Sort by average comparison (HeapSort/CountingSort)\n");
   print_separator('=', 60);
 
-  int n = get_int_input_range("\nArray size: ", 1, 1000);
+  int n = get_int_input_range("\nArray size: ", 0, 1000);
   int *arr = create_and_populate_vec1(n, -100, 100);
 
   print_vec1(arr, n, "Original Array:");
   print_sorting_mode();
 
+  if (n == 0) {
+    printf("\nEmpty array --> no sorting to apply.\n");
+    print_vec1(arr, n, "\nSorted Array:");
+    free(arr);
+    return;
+  }
+
   double avg_even = calculate_avg_at_even_positions(arr, n);
   double avg_odd = calculate_avg_at_odd_positions(arr, n);
+  int ascending;
+  sort_fn array_sort;
+  sort_fn pointer_sort;
 
   printf("\nAvg[even]=%.2f, Avg[odd]=%.2f\n", avg_even, avg_odd);
 
   if (avg_even > avg_odd) {
     printf("HeapSort (ascending)\n");
-    run_selected_sort(heap_sort_array, heap_sort_pointer, arr, (size_t)n, 1);
+    array_sort = heap_sort_array;
+    pointer_sort = heap_sort_pointer;
+    ascending = 1;
   } else {
     printf("CountingSort (descending)\n");
-    run_selected_sort(counting_sort_array, counting_sort_pointer, arr, (size_t)n, 0);
+    array_sort = counting_sort_array;
+    pointer_sort = counting_sort_pointer;
+    ascending = 0;
   }
+
+  run_selected_sort(array_sort, pointer_sort, arr, (size_t)n, ascending);
 
   print_vec1(arr, n, "\nSorted Array:");
 
@@ -115,21 +133,37 @@ void task_1b(void) {
   printf("TASK 1B: Sort by prime check (RadixSort/CombSort)\n");
   print_separator('=', 60);
 
-  int n = get_int_input_range("\nArray size: ", 1, 1000);
+  int n = get_int_input_range("\nArray size: ", 0, 1000);
   int *arr = create_and_populate_vec1(n, 1, 100);
 
   print_vec1(arr, n, "Original Array:");
   print_sorting_mode();
 
+  if (n == 0) {
+    printf("\nEmpty array --> no sorting to apply.\n");
+    print_vec1(arr, n, "\nSorted Array:");
+    free(arr);
+    return;
+  }
+
   int has_primes = has_prime_numbers(arr, n);
+  int ascending;
+  sort_fn array_sort;
+  sort_fn pointer_sort;
 
   if (has_primes) {
     printf("\nPrimes found --> RadixSort (ascending)\n");
-    run_selected_sort(radix_sort_array, radix_sort_pointer, arr, (size_t)n, 1);
+    array_sort = radix_sort_array;
+    pointer_sort = radix_sort_pointer;
+    ascending = 1;
   } else {
     printf("\nNo primes --> CombSort (descending)\n");
-    run_selected_sort(comb_sort_array, comb_sort_pointer, arr, (size_t)n, 0);
+    array_sort = comb_sort_array;
+    pointer_sort = comb_sort_pointer;
+    ascending = 0;
   }
+
+  run_selected_sort(array_sort, pointer_sort, arr, (size_t)n, ascending);
 
   print_vec1(arr, n, "\nSorted Array:");
 
@@ -140,22 +174,42 @@ void task_1c(void) {
   printf("TASK 1C: Sort by negative product (MergeSort/BubbleSort)\n");
   print_separator('=', 60);
 
-  int n = get_int_input_range("\nArray size: ", 1, 1000);
+  int n = get_int_input_range("\nArray size: ", 0, 1000);
   int *arr = create_and_populate_vec1(n, -50, 50);
 
   print_vec1(arr, n, "Original Array:");
   print_sorting_mode();
 
+  if (n == 0) {
+    printf("\nEmpty array --> no sorting to apply.\n");
+    print_vec1(arr, n, "\nSorted Array:");
+    free(arr);
+    return;
+  }
+
   int product;
   int has_negatives = calculate_product_of_negatives(arr, n, &product);
+  int ascending;
+  sort_fn array_sort;
+  sort_fn pointer_sort;
 
   if (has_negatives && product < 0) {
     printf("\nNegative product=%d --> MergeSort (descending)\n", product);
-    run_selected_sort(merge_sort_array, merge_sort_pointer, arr, (size_t)n, 0);
+    array_sort = merge_sort_array;
+    pointer_sort = merge_sort_pointer;
+    ascending = 0;
   } else {
-    printf("\nNo negative product --> BubbleSort (ascending)\n");
-    run_selected_sort(bubble_sort_array, bubble_sort_pointer, arr, (size_t)n, 1);
+    if (!has_negatives) {
+      printf("\nNo negative elements --> BubbleSort (ascending)\n");
+    } else {
+      printf("\nNegative product is not < 0 --> BubbleSort (ascending)\n");
+    }
+    array_sort = bubble_sort_array;
+    pointer_sort = bubble_sort_pointer;
+    ascending = 1;
   }
+
+  run_selected_sort(array_sort, pointer_sort, arr, (size_t)n, ascending);
 
   print_vec1(arr, n, "\nSorted Array:");
 
@@ -166,11 +220,18 @@ void task_2a(void) {
   printf("TASK 2A: Diagonal/column sort (QuickSort/ShellSort)\n");
   print_separator('=', 60);
 
-  int n = get_int_input_range("\nMatrix size (n x n): ", 1, 100);
+  int n = get_int_input_range("\nMatrix size (n x n): ", 0, 100);
   int *arr = create_and_populate_vec2(n, n, -50, 50);
 
   print_vec2(arr, n, n, "Original Array:");
   print_sorting_mode();
+
+  if (n == 0) {
+    printf("\nEmpty matrix --> no sorting to apply.\n");
+    print_vec2(arr, n, n, "\nSorted Array:");
+    free(arr);
+    return;
+  }
 
   int count = count_above_main_diagonal(n);
   printf("\nAbove diagonal=%d, k=%d\n", count, K_CONSTANT);
@@ -206,12 +267,19 @@ void task_2b(void) {
   printf("TASK 2B: Sort by max element (SelectionSort/InsertionSort)\n");
   print_separator('=', 60);
 
-  int rows = get_int_input_range("\nRows: ", 1, 100);
-  int cols = get_int_input_range("Columns: ", 1, 100);
-  int *arr = create_and_populate_vec2(rows, cols, -50, 50);
+  int n = get_int_input_range("\nMatrix size (n x n): ", 0, 100);
+  int rows = n;
+  int cols = n;
+  int *arr = create_and_populate_vec2(n, n, -50, 50);
 
   print_vec2(arr, rows, cols, "Original Array:");
   print_sorting_mode();
+
+  if (rows == 0 || cols == 0) {
+    printf("\nEmpty matrix --> no max element and no sorting to apply.\n");
+    free(arr);
+    return;
+  }
 
   int max_val, count;
   int *positions = NULL;

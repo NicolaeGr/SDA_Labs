@@ -1,7 +1,9 @@
-#include "array_utils.h"
-#include "utils.h"
 #include <math.h>
 #include <stdlib.h>
+
+#include "common/utils.h"
+
+#include "array_utils.h"
 
 void populate_vec1(int *arr, size_t n, int min, int max) {
   if (get_yes_no_input("Generate random array?", 1)) {
