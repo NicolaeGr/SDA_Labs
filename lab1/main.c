@@ -19,6 +19,7 @@ void task_1b(void);
 void task_1c(void);
 void task_2a(void);
 void task_2b(void);
+
 void select_mode(void);
 void print_sorting_mode(void);
 void run_selected_sort(sort_fn array_sort, sort_fn pointer_sort, int *arr, size_t size, int ascending);
