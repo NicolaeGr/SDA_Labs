@@ -13,3 +13,4 @@ target_include_directories(common_lib PUBLIC ${CMAKE_SOURCE_DIR})
 
 add_subdirectory(lab1)
 add_subdirectory(lab2)
+add_subdirectory(lab3)

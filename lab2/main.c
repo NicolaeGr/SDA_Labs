@@ -76,7 +76,6 @@ void action_input_products(void) {
   print_separator('-', 60);
   printf("Total products: %zu\n", products->count);
   print_separator('-', 60);
-  wait_for_enter();
 }
 
 void action_display_products(void) {
@@ -87,12 +86,10 @@ void action_display_products(void) {
     printf("No Products Available\n");
     print_separator('=', 60);
     printf("\nNo products to display. Please input or load products first.\n");
-    wait_for_enter();
     return;
   }
 
   product_display_array(products->items, products->count, "Product List");
-  wait_for_enter();
 }
 
 void action_sort_products(void) {
@@ -103,7 +100,6 @@ void action_sort_products(void) {
     printf("Sort Products\n");
     print_separator('=', 60);
     printf("\nNo products to sort. Please input or load products first.\n");
-    wait_for_enter();
     return;
   }
 
@@ -153,7 +149,6 @@ void action_sort_products(void) {
   }
   printf("Sorting completed!\n");
   print_separator('=', 60);
-  wait_for_enter();
 }
 
 void action_load_mock_data(void) {
@@ -170,7 +165,6 @@ void action_load_mock_data(void) {
 
   if (mock_count == 0 || !mock_products) {
     fprintf(stderr, "Error: Failed to create mock data\n");
-    wait_for_enter();
     return;
   }
 
@@ -189,7 +183,6 @@ void action_load_mock_data(void) {
 
   printf("Successfully processed %zu mock products! Total now: %zu\n", mock_count, products->count);
   print_separator('-', 60);
-  wait_for_enter();
 }
 
 void action_clear_products(void) {
@@ -201,7 +194,6 @@ void action_clear_products(void) {
 
   if (!products || products->count == 0) {
     printf("No products to clear.\n");
-    wait_for_enter();
     return;
   }
 
@@ -211,6 +203,4 @@ void action_clear_products(void) {
   } else {
     printf("Cancelled.\n");
   }
-
-  wait_for_enter();
 }
