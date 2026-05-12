@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "common/menu.h"
-#include "common/product.h"
+#include "common/product/product.h"
 #include "common/utils.h"
 
 #include "lib/sort.h"

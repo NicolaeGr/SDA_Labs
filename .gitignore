@@ -25,3 +25,7 @@ Makefile
 .direnv/
 result
 result-*
+
+# Clangd files
+.clangd
+.cache/

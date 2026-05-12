@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "common/product.h"
+#include "common/product/product.h"
 
 // File operations for binary file I/O with Product structures
 

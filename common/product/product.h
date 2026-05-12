@@ -1,5 +1,5 @@
-#ifndef PRODUCT_H
-#define PRODUCT_H
+#ifndef COMMON_PRODUCT_PRODUCT_H
+#define COMMON_PRODUCT_PRODUCT_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -55,4 +55,4 @@ int product_compare_by_price(const void *a, const void *b);
 
 const ProductFieldInfo *product_get_sort_fields(void);
 
-#endif // PRODUCT_H
+#endif // COMMON_PRODUCT_PRODUCT_H

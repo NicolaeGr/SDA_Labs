@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_options(-Wall -Wextra)
 
-file(GLOB COMMON_SOURCES "common/*.c")
+file(GLOB_RECURSE COMMON_SOURCES "common/*.c")
 add_library(common_lib ${COMMON_SOURCES})
 
 target_include_directories(common_lib PUBLIC ${CMAKE_SOURCE_DIR})
@@ -14,3 +14,4 @@ target_include_directories(common_lib PUBLIC ${CMAKE_SOURCE_DIR})
 add_subdirectory(lab1)
 add_subdirectory(lab2)
 add_subdirectory(lab3)
+add_subdirectory(lab4)

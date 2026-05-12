@@ -1,49 +1,44 @@
 {
-  description = "Lab1 - C Sorting Algorithms Project";
+  description = "SDA C++ development environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
+    { self, nixpkgs }:
     {
-      self,
-      nixpkgs,
-      flake-utils,
-    }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            cmake
-            gnumake
-            ninja
-
-            clang
-            clang-tools
-            llvmPackages.libclang
-            gcc
-
-            gdb
-            valgrind
-
-            clang-tools
-            shfmt
-            cppcheck
-
-            pkg-config
-            just
+      devShells.x86_64-linux.default =
+        let
+          pkgs = import nixpkgs { system = "x86_64-linux"; };
+        in
+        pkgs.mkShell {
+          buildInputs = [
+            pkgs.llvmPackages_latest.clang
+            pkgs.llvmPackages_latest.llvm
+            pkgs.cmake
+            pkgs.lld
+            pkgs.ninja
+            pkgs.pkg-config
+            pkgs.gdb
+            pkgs.just
+            pkgs.glibc.dev
           ];
 
-          CMAKE_EXPORT_COMPILE_COMMANDS = "ON";
-          CC = "clang";
-          CXX = "clang++";
+          shellHook = ''
+            export LLVM_PATH="${pkgs.llvmPackages_latest.libllvm.dev}"
+            export LLVM_INCLUDE_DIR="$LLVM_PATH/include"
+            export C_INCLUDE_PATH=${pkgs.glibc.dev}/include
+            export CPLUS_INCLUDE_PATH=${pkgs.glibc.dev}/include
+            export CLANGD_PATH="${pkgs.llvmPackages_latest.clang}/bin/clangd" 
+            cat <<EOF > .clangd
+            CompileFlags:
+              Add:
+                - "-I${pkgs.llvmPackages_latest.libllvm.dev}/include"
+                - "-I${pkgs.glibc.dev}/include"
+                - "-L${pkgs.llvmPackages_latest.libllvm.lib}/lib"
+            EOF
+          '';
         };
-      }
-    );
+    };
 }

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common/utils.h"
+#include "../utils.h"
 
 #define PRODUCT_INITIAL_CAPACITY 10
 #define PRODUCT_GROWTH_FACTOR 1.5

@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common/product/search.h"
 #include "common/utils.h"
 
 #include "file_ops.h"
-#include "linear_search.h"
 #include "sort.h"
 
 bool file_create_and_populate(const char *filename, ProductArray **out_products) {
@@ -170,37 +170,12 @@ int file_search_by_field(const char *filename, int field_index, const char *sear
 
   fclose(file);
 
-  if (field_index < 0 || field_index > 3) {
+  if (field_index < 0 || field_index >= PRODUCT_SORT_FIELD_COUNT) {
     product_array_free(products);
     return -1;
   }
 
-  int result = -1;
-  for (size_t i = 0; i < products->count; i++) {
-    int cmp_result = 0;
-    const Product *prod = &products->items[i];
-
-    switch (field_index) {
-    case 0: // name
-      cmp_result = strcasecmp(prod->name, search_value);
-      break;
-    case 1: // country
-      cmp_result = strcasecmp(prod->country, search_value);
-      break;
-    case 2: // manufacturer
-      cmp_result = strcasecmp(prod->manufacturer, search_value);
-      break;
-    case 3: // item
-      cmp_result = strcasecmp(prod->item, search_value);
-      break;
-    }
-
-    if (cmp_result == 0) {
-      result = (int)i;
-      break;
-    }
-  }
-
+  int result = product_search_by_field(products->items, products->count, (ProductSortField)field_index, search_value);
   product_array_free(products);
   return result;
 }

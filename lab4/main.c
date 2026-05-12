@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "common/menu.h"
+#include "common/product/product.h"
 #include "common/utils.h"
 
 #include "lib/file_ops.h"
@@ -24,39 +25,40 @@ int main(void) {
   enter_alternate_screen();
   setup_terminal_cleanup();
 
-  MenuItem items[] = {{1, "Create binary file and input products", action_create_file},
+  MenuItem items[] = {{1, "Create text file and input products", action_create_file},
                       {2, "Display file contents", action_display_file},
                       {3, "Append product to file", action_append_product},
                       {4, "Modify product in file", action_update_product},
                       {5, "Search product in file (Linear Search)", action_search_product},
-                      {6, "Sort products in file", action_sort_file},
+                      {6, "Sort products in file (Insertion Sort)", action_sort_file},
                       {7, "Delete product from file", action_delete_product},
                       {8, "Delete file from disk", action_delete_file},
                       {0, "Exit", NULL}};
 
   int item_count = sizeof(items) / sizeof(MenuItem);
-
-  Menu *main_menu = menu_create("Lab3 - Binary File Operations with Products", items, item_count);
+  Menu *main_menu = menu_create("Lab4 - Text File Operations with Products", items, item_count);
   if (!main_menu) {
     fprintf(stderr, "Error: Failed to create menu\n");
     return 1;
   }
 
   menu_run(main_menu, 0);
-
   menu_free(main_menu);
-
   return 0;
+}
+
+static void read_filename(char *buffer, size_t size) {
+  printf("Enter filename: ");
+  if (!fgets(buffer, size, stdin)) {
+    buffer[0] = '\0';
+    return;
+  }
+  buffer[strcspn(buffer, "\n")] = '\0';
 }
 
 void action_create_file(void) {
   clear_screen();
-  printf("Enter filename: ");
-  if (!fgets(current_filename, sizeof(current_filename), stdin)) {
-    current_filename[0] = '\0';
-  } else {
-    current_filename[strcspn(current_filename, "\n")] = '\0';
-  }
+  read_filename(current_filename, sizeof(current_filename));
 
   if (current_filename[0] == '\0') {
     printf("No filename entered.\n");
@@ -64,16 +66,16 @@ void action_create_file(void) {
   }
 
   if (access(current_filename, F_OK) == 0) {
-    if (get_yes_no_input("File already exists. Read its contents instead of overwriting?", 1)) {
+    if (get_yes_no_input("File already exists. Read it instead of overwriting?", 1)) {
       printf("\nFile: %s\n", current_filename);
       print_separator('=', 60);
-      file_read_and_display(current_filename);
+      text_file_read_and_display(current_filename);
       return;
     }
   }
 
   ProductArray *products = NULL;
-  if (file_create_and_populate(current_filename, &products)) {
+  if (text_file_create_and_populate(current_filename, &products)) {
     if (products) {
       product_array_free(products);
     }
@@ -91,7 +93,7 @@ void action_display_file(void) {
 
   printf("File: %s\n", current_filename);
   print_separator('=', 60);
-  file_read_and_display(current_filename);
+  text_file_read_and_display(current_filename);
 }
 
 void action_append_product(void) {
@@ -108,7 +110,7 @@ void action_append_product(void) {
   printf("\nEnter product details:\n");
   product_input(&product);
 
-  if (!file_append_product(current_filename, &product)) {
+  if (!text_file_append_product(current_filename, &product)) {
     printf("Failed to append product\n");
   }
 }
@@ -130,7 +132,7 @@ void action_update_product(void) {
   printf("\nEnter new product details:\n");
   product_input(&product);
 
-  if (!file_update_product(current_filename, index, &product)) {
+  if (!text_file_update_product(current_filename, index, &product)) {
     printf("Failed to update product\n");
   }
 }
@@ -155,10 +157,13 @@ void action_search_product(void) {
 
   char search_value[100] = {0};
   printf("Enter search value: ");
-  fgets(search_value, sizeof(search_value), stdin);
+  if (!fgets(search_value, sizeof(search_value), stdin)) {
+    printf("Failed to read search value\n");
+    return;
+  }
   search_value[strcspn(search_value, "\n")] = '\0';
 
-  file_search_by_field(current_filename, field_index, search_value);
+  text_file_search_by_field(current_filename, field_index, search_value);
 }
 
 void action_sort_file(void) {
@@ -183,10 +188,11 @@ void action_sort_file(void) {
   printf("0. Ascending\n");
   printf("1. Descending\n");
   int direction = get_int_input("Select direction: ");
-  if (direction != 0)
+  if (direction != 0) {
     direction = 1;
+  }
 
-  if (!file_sort_by_field(current_filename, field_index, direction == 0 ? 1 : -1)) {
+  if (!text_file_sort_by_field(current_filename, field_index, direction == 0 ? 1 : -1)) {
     printf("Failed to sort file\n");
   }
 }
@@ -204,7 +210,7 @@ void action_delete_product(void) {
   int idx = get_int_input("Enter product index to delete: ");
   size_t index = (size_t)idx;
 
-  if (!file_delete_product(current_filename, index)) {
+  if (!text_file_delete_product(current_filename, index)) {
     printf("Failed to delete product\n");
   }
 }
@@ -220,7 +226,7 @@ void action_delete_file(void) {
   print_separator('=', 60);
 
   if (get_yes_no_input("Are you sure you want to delete the file? (y/n): ", 0)) {
-    if (file_delete_file(current_filename)) {
+    if (text_file_delete_file(current_filename)) {
       current_filename[0] = '\0';
     } else {
       printf("Failed to delete file\n");
