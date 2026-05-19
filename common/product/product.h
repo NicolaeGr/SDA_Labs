@@ -8,7 +8,7 @@ typedef struct {
   char name[100];
   char country[50];
   char manufacturer[100];
-  char item[100];
+  char item_code[100];
   double price;
 } Product;
 

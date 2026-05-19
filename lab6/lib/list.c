@@ -154,14 +154,14 @@ void product_list_display(const ProductList *list, const char *title) {
   }
 
   print_separator('=', 90);
-  printf("  %-5s | %-20s | %-15s | %-20s | %-20s | %-10s\n", "No", "Name", "Country", "Manufacturer", "Item", "Price");
+  printf("  %-5s | %-20s | %-15s | %-20s | %-20s | %-10s\n", "No", "Name", "Country", "Manufacturer", "Item Code", "Price");
   print_separator('-', 90);
 
   const ListNode *current = list->head;
   size_t index = 1;
   while (current) {
-    printf("  %-5zu | %-20s | %-15s | %-20s | %-20s | %-10.2f\n", index, current->data.name, current->data.country,
-           current->data.manufacturer, current->data.item, current->data.price);
+        printf("  %-5zu | %-20s | %-15s | %-20s | %-20s | %-10.2f\n", index, current->data.name, current->data.country,
+          current->data.manufacturer, current->data.item_code, current->data.price);
     current = current->next;
     index++;
   }

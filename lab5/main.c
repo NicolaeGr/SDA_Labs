@@ -226,7 +226,7 @@ static void action_append_modified_to_stack_file(void) {
   int ok;
   if (mode == 1) {
     ok = fprintf(file, "APPENDED: %s | %s | %s | %s | %.2f\n", last_modified.name, last_modified.country,
-                 last_modified.manufacturer, last_modified.item, last_modified.price) >= 0;
+           last_modified.manufacturer, last_modified.item_code, last_modified.price) >= 0;
   } else {
     ok = fwrite(&last_modified, sizeof(Product), 1, file) == 1;
   }

@@ -41,7 +41,7 @@ static const char *field_name(ProductSortField field) {
   case PRODUCT_SORT_BY_MANUFACTURER:
     return "Manufacturer";
   case PRODUCT_SORT_BY_ITEM:
-    return "Item";
+    return "Item Code";
   case PRODUCT_SORT_BY_PRICE:
     return "Price";
   default:
@@ -83,7 +83,7 @@ int product_search_by_field(const Product *items, size_t count, ProductSortField
       match = contains_case_insensitive(product->manufacturer, query);
       break;
     case PRODUCT_SORT_BY_ITEM:
-      match = contains_case_insensitive(product->item, query);
+      match = contains_case_insensitive(product->item_code, query);
       break;
     case PRODUCT_SORT_BY_PRICE:
       match = (product->price == price_query);

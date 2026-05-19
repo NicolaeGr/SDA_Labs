@@ -29,7 +29,7 @@ int main(void) {
   MenuItem items[] = {{1, "Input products from keyboard", action_input_products},
                       {2, "Display products", action_display_products},
                       {3, "Sort products (Quick Sort / Merge Sort)", action_sort_products},
-                      {4, "Load mock data (for testing)", action_load_mock_data},
+                      {4, "Load mock data", action_load_mock_data},
                       {5, "Clear all products", action_clear_products},
                       {0, "Exit", NULL}};
 

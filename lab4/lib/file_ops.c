@@ -9,7 +9,7 @@
 #include "sort.h"
 
 static bool write_product_line(FILE *file, const Product *product) {
-  return fprintf(file, "%s|%s|%s|%s|%.2f\n", product->name, product->country, product->manufacturer, product->item,
+  return fprintf(file, "%s|%s|%s|%s|%.2f\n", product->name, product->country, product->manufacturer, product->item_code,
                  product->price) >= 0;
 }
 
@@ -19,7 +19,7 @@ static bool parse_product_line(const char *line, Product *product) {
   }
 
   Product parsed = {0};
-  if (sscanf(line, "%99[^|]|%49[^|]|%99[^|]|%99[^|]|%lf", parsed.name, parsed.country, parsed.manufacturer, parsed.item,
+  if (sscanf(line, "%99[^|]|%49[^|]|%99[^|]|%99[^|]|%lf", parsed.name, parsed.country, parsed.manufacturer, parsed.item_code,
              &parsed.price) != 5) {
     return false;
   }

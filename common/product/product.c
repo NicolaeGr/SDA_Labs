@@ -129,9 +129,9 @@ void product_input(Product *item) {
     return;
   }
 
-  printf("Enter item: ");
+  printf("Enter item code: ");
   fflush(stdout);
-  if (!read_line_into(item->item, sizeof(item->item))) {
+  if (!read_line_into(item->item_code, sizeof(item->item_code))) {
     return;
   }
 
@@ -155,8 +155,8 @@ void product_display(const Product *item) {
     return;
   }
 
-  printf("  %-20s | %-15s | %-20s | %-20s | $%.2f\n", item->name, item->country, item->manufacturer, item->item,
-         item->price);
+    printf("  %-20s | %-15s | %-20s | %-20s | $%.2f\n", item->name, item->country, item->manufacturer, item->item_code,
+      item->price);
 }
 
 void product_display_array(const Product *items, size_t count, const char *title) {
@@ -170,7 +170,7 @@ void product_display_array(const Product *items, size_t count, const char *title
   }
 
   print_separator('=', 90);
-  printf("  %-20s | %-15s | %-20s | %-20s | %-10s\n", "Name", "Country", "Manufacturer", "Item", "Price");
+  printf("  %-20s | %-15s | %-20s | %-20s | %-10s\n", "Name", "Country", "Manufacturer", "Item Code", "Price");
   print_separator('-', 90);
 
   for (size_t i = 0; i < count; i++) {
@@ -231,7 +231,7 @@ int product_compare_by_manufacturer(const void *a, const void *b) {
 int product_compare_by_item(const void *a, const void *b) {
   const Product *item_a = (const Product *)a;
   const Product *item_b = (const Product *)b;
-  return sort_direction * strcasecmp(item_a->item, item_b->item);
+  return sort_direction * strcasecmp(item_a->item_code, item_b->item_code);
 }
 
 int product_compare_by_price(const void *a, const void *b) {
@@ -253,7 +253,7 @@ int product_compare_by_price(const void *a, const void *b) {
 static const ProductFieldInfo sort_fields[] = {{product_compare_by_name, "Name"},
                                                {product_compare_by_country, "Country"},
                                                {product_compare_by_manufacturer, "Manufacturer"},
-                                               {product_compare_by_item, "Item"},
+                                               {product_compare_by_item, "Item Code"},
                                                {product_compare_by_price, "Price"}};
 
 const ProductFieldInfo *product_get_sort_fields(void) { return sort_fields; }

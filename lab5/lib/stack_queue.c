@@ -91,7 +91,7 @@ bool stack_write_text(const ProductStack *stack, FILE *file) {
   size_t idx = 1;
   while (node) {
     const Product *p = &node->data;
-    fprintf(file, "%zu) %s | %s | %s | %s | %.2f\n", idx, p->name, p->country, p->manufacturer, p->item, p->price);
+    fprintf(file, "%zu) %s | %s | %s | %s | %.2f\n", idx, p->name, p->country, p->manufacturer, p->item_code, p->price);
     node = node->next;
     idx++;
   }
@@ -204,7 +204,7 @@ bool queue_write_text(const ProductQueue *queue, FILE *file) {
   size_t idx = 1;
   while (node) {
     const Product *p = &node->data;
-    fprintf(file, "%zu) %s | %s | %s | %s | %.2f\n", idx, p->name, p->country, p->manufacturer, p->item, p->price);
+    fprintf(file, "%zu) %s | %s | %s | %s | %.2f\n", idx, p->name, p->country, p->manufacturer, p->item_code, p->price);
     node = node->next;
     idx++;
   }
