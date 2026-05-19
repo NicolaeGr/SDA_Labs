@@ -155,8 +155,8 @@ void product_display(const Product *item) {
     return;
   }
 
-    printf("  %-20s | %-15s | %-20s | %-20s | $%.2f\n", item->name, item->country, item->manufacturer, item->item_code,
-      item->price);
+  printf("  %-20s | %-15s | %-20s | %-20s | $%.2f\n", item->name, item->country, item->manufacturer, item->item_code,
+         item->price);
 }
 
 void product_display_array(const Product *items, size_t count, const char *title) {
@@ -190,16 +190,16 @@ size_t product_create_mock_data(Product **items) {
     return 0;
   }
 
-  static const Product mock_data[] = {{"iPhone 15", "USA", "Apple", "Smartphone", 999.99},
-                                      {"Galaxy S24", "South Korea", "Samsung", "Smartphone", 899.99},
-                                      {"ThinkPad X1", "China", "Lenovo", "Laptop", 1299.99},
-                                      {"MacBook Pro", "USA", "Apple", "Laptop", 2499.99},
-                                      {"Pixel 8", "USA", "Google", "Smartphone", 699.99},
-                                      {"Surface Laptop", "USA", "Microsoft", "Laptop", 1199.99},
-                                      {"AirPods Pro", "USA", "Apple", "Headphones", 249.99},
-                                      {"Xperia 5", "Japan", "Sony", "Smartphone", 799.99},
-                                      {"ZenBook 14", "Taiwan", "ASUS", "Laptop", 899.99},
-                                      {"OnePlus 12", "China", "OnePlus", "Smartphone", 749.99}};
+  static const Product mock_data[] = {{"iPhone 15", "USA", "Apple", "MTP03ZD/A", 999.99},
+                                      {"Galaxy S24", "South Korea", "Samsung", "SM-S921BZKDEUB", 899.99},
+                                      {"ThinkPad X1", "China", "Lenovo", "21HM002FUS", 1299.99},
+                                      {"MacBook Pro", "USA", "Apple", "MRX33LL/A", 2499.99},
+                                      {"Pixel 8", "USA", "Google", "GA04803-US", 699.99},
+                                      {"Surface Laptop", "USA", "Microsoft", "ZUI-00001", 1199.99},
+                                      {"AirPods Pro", "USA", "Apple", "MTJV3AM/A", 249.99},
+                                      {"Xperia 5", "Japan", "Sony", "XQ-DE72/B", 799.99},
+                                      {"ZenBook 14", "Taiwan", "ASUS", "UX3405MA-QD552W", 899.99},
+                                      {"OnePlus 12", "China", "OnePlus", "CPH2583", 749.99}};
 
   memcpy(data, mock_data, sizeof(mock_data));
   *items = data;
