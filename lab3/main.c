@@ -123,7 +123,26 @@ void action_update_product(void) {
   printf("File: %s\n", current_filename);
   print_separator('=', 60);
 
-  int idx = get_int_input("Enter product index to modify: ");
+  // Load the file to validate the index
+  FILE *file = fopen(current_filename, "rb");
+  if (!file) {
+    printf("Cannot open file to validate index\n");
+    return;
+  }
+
+  fseek(file, 0, SEEK_END);
+  long file_size = ftell(file);
+  size_t product_count = file_size / sizeof(Product);
+  fclose(file);
+
+  printf("File contains %zu products\n", product_count);
+
+  if (product_count == 0) {
+    printf("File is empty, nothing to modify\n");
+    return;
+  }
+
+  int idx = get_int_input_range("Enter product index to modify (0-based): ", 0, (int)product_count - 1);
   size_t index = (size_t)idx;
 
   Product product = {0};
@@ -201,7 +220,27 @@ void action_delete_product(void) {
   printf("File: %s\n", current_filename);
   print_separator('=', 60);
 
-  int idx = get_int_input("Enter product index to delete: ");
+  // Load the file to validate the index
+  FILE *file = fopen(current_filename, "rb");
+  if (!file) {
+    printf("Cannot open file to validate index\n");
+    return;
+  }
+
+  // Count products in file
+  fseek(file, 0, SEEK_END);
+  long file_size = ftell(file);
+  size_t product_count = file_size / sizeof(Product);
+  fclose(file);
+
+  printf("File contains %zu products\n", product_count);
+
+  if (product_count == 0) {
+    printf("File is empty, nothing to delete\n");
+    return;
+  }
+
+  int idx = get_int_input_range("Enter product index to delete (0-based): ", 0, (int)product_count - 1);
   size_t index = (size_t)idx;
 
   if (!file_delete_product(current_filename, index)) {
@@ -219,7 +258,7 @@ void action_delete_file(void) {
   printf("File: %s\n", current_filename);
   print_separator('=', 60);
 
-  if (get_yes_no_input("Are you sure you want to delete the file? (y/n): ", 0)) {
+  if (get_yes_no_input("Are you sure you want to delete the file?: ", 0)) {
     if (file_delete_file(current_filename)) {
       current_filename[0] = '\0';
     } else {

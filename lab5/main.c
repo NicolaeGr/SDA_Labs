@@ -192,8 +192,8 @@ static void action_modify_stack_element(void) {
     return;
   }
 
-  int idx = get_int_input_range("Element position from top (1-based): ", 1, (int)stack_size(&stack_data));
-  Product *target = stack_get_at(&stack_data, (size_t)(idx - 1));
+  int idx = get_int_input_range("Element position from top (0-based): ", 0, (int)stack_size(&stack_data) - 1);
+  Product *target = stack_get_at(&stack_data, (size_t)idx);
   if (!target) {
     printf("Invalid position.\n");
     return;
@@ -226,7 +226,7 @@ static void action_append_modified_to_stack_file(void) {
   int ok;
   if (mode == 1) {
     ok = fprintf(file, "APPENDED: %s | %s | %s | %s | %.2f\n", last_modified.name, last_modified.country,
-           last_modified.manufacturer, last_modified.item_code, last_modified.price) >= 0;
+                 last_modified.manufacturer, last_modified.item_code, last_modified.price) >= 0;
   } else {
     ok = fwrite(&last_modified, sizeof(Product), 1, file) == 1;
   }

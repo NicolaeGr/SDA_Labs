@@ -123,27 +123,31 @@ bool file_update_product(const char *filename, size_t index, const Product *prod
     return false;
   }
 
-  FILE *file = fopen(filename, "r+b");
-  if (!file) {
-    perror("Failed to open file");
+  ProductArray *products = product_array_create(10);
+  if (!products) {
     return false;
   }
 
-  if (fseek(file, (long)index * sizeof(Product), SEEK_SET) != 0) {
-    perror("Failed to seek in file");
-    fclose(file);
+  if (!file_load_all(filename, &products)) {
+    product_array_free(products);
     return false;
   }
 
-  if (fwrite(product, sizeof(Product), 1, file) != 1) {
-    perror("Failed to update product");
-    fclose(file);
+  if (index >= products->count) {
+    printf("Invalid index\n");
+    product_array_free(products);
     return false;
   }
 
-  fclose(file);
-  printf("Product updated successfully\n");
-  return true;
+  products->items[index] = *product;
+
+  bool success = file_save_all(filename, products);
+  product_array_free(products);
+
+  if (success) {
+    printf("Product updated successfully\n");
+  }
+  return success;
 }
 
 int file_search_by_field(const char *filename, int field_index, const char *search_value) {

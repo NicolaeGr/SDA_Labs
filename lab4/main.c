@@ -56,6 +56,26 @@ static void read_filename(char *buffer, size_t size) {
   buffer[strcspn(buffer, "\n")] = '\0';
 }
 
+static int get_loaded_product_count(const char *filename, size_t *count) {
+  if (!filename || !count) {
+    return 0;
+  }
+
+  ProductArray *products = product_array_create(10);
+  if (!products) {
+    return 0;
+  }
+
+  if (!text_file_load_all(filename, &products)) {
+    product_array_free(products);
+    return 0;
+  }
+
+  *count = products->count;
+  product_array_free(products);
+  return 1;
+}
+
 void action_create_file(void) {
   clear_screen();
   read_filename(current_filename, sizeof(current_filename));
@@ -125,7 +145,18 @@ void action_update_product(void) {
   printf("File: %s\n", current_filename);
   print_separator('=', 60);
 
-  int idx = get_int_input("Enter product index to modify: ");
+  size_t product_count = 0;
+  if (!get_loaded_product_count(current_filename, &product_count)) {
+    printf("Failed to load file data.\n");
+    return;
+  }
+
+  if (product_count == 0) {
+    printf("File is empty, nothing to modify.\n");
+    return;
+  }
+
+  int idx = get_int_input_range("Enter product index to modify: ", 0, (int)product_count - 1);
   size_t index = (size_t)idx;
 
   Product product = {0};
@@ -207,7 +238,18 @@ void action_delete_product(void) {
   printf("File: %s\n", current_filename);
   print_separator('=', 60);
 
-  int idx = get_int_input("Enter product index to delete: ");
+  size_t product_count = 0;
+  if (!get_loaded_product_count(current_filename, &product_count)) {
+    printf("Failed to load file data.\n");
+    return;
+  }
+
+  if (product_count == 0) {
+    printf("File is empty, nothing to delete.\n");
+    return;
+  }
+
+  int idx = get_int_input_range("Enter product index to delete: ", 0, (int)product_count - 1);
   size_t index = (size_t)idx;
 
   if (!text_file_delete_product(current_filename, index)) {
@@ -225,7 +267,7 @@ void action_delete_file(void) {
   printf("File: %s\n", current_filename);
   print_separator('=', 60);
 
-  if (get_yes_no_input("Are you sure you want to delete the file? (y/n): ", 0)) {
+  if (get_yes_no_input("Are you sure you want to delete the file?: ", 0)) {
     if (text_file_delete_file(current_filename)) {
       current_filename[0] = '\0';
     } else {

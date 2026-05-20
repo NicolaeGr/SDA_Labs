@@ -1,0 +1,5 @@
+QUEUE (front -> rear)
+============================================================
+1) OnePlus 12 | China | OnePlus | CPH2583 | 749.99
+2) ThinkPad X1 | China | Lenovo | 21HM002FUS | 1299.99
+Total: 2
